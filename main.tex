@@ -1,0 +1,196 @@
+\documentclass{article}
+
+% Language setting
+% Replace `english' with e.g. `spanish' to change the document language
+\usepackage[english]{babel}
+
+% Set page size and margins
+% Replace `letterpaper' with `a4paper' for UK/EU standard size
+\usepackage[letterpaper,top=2cm,bottom=2cm,left=3cm,right=3cm,marginparwidth=1.75cm]{geometry}
+
+% Useful packages
+\usepackage{amsmath}
+\usepackage{graphicx}
+\usepackage[colorlinks=true, allcolors=blue]{hyperref}
+\usepackage{float}
+
+% for python code
+\usepackage{listings}
+\usepackage{xcolor}
+
+\lstset{
+    basicstyle=\ttfamily\small,
+    keywordstyle=\color{blue},
+    stringstyle=\color{red},
+    commentstyle=\color{teal},
+    showstringspaces=false,
+    frame=single,
+    breaklines=true,
+    columns=fullflexible
+}
+
+
+\title{Spotify Track Popularity Predicition}
+\author{Kevin Alvarez \and 
+Will Burns \and 
+Jenna Jabourian \and 
+Connor Perrone \and 
+Gabe Sanchez}
+
+\begin{document}
+\maketitle
+
+\begin{abstract}
+Blah Blah Blah
+\end{abstract}
+
+\section{Introduction}
+
+The purpose of this project is to analyze the Spotify track data set and develop a model capable of predicting the popularity of the track using various features. The data set contains numerical and categorical attributes that describe musical characteristics such as danceability, loudness, energy, tempo, key, and valence. Our goal is to explore which features are the most strongly correlated with popularity and to compare different predictive methods in terms of accuracy, interpret-ability, and robustness. 
+
+\section{Results}
+Blah Blah Blah
+
+\section{Discussion}
+
+Blah Blah Blah
+
+\appendix
+\section{Methods}
+
+\subsection{Exploratory Data Analysis}
+
+For our exploratory data analysis (EDA), we began by examining the structure of the Spotify dataset, including the number of observations, feature types, and any missing or duplicated entries. We generate summary statistics for numerical features to understand their ranges, distributions, and potential outliers.
+
+As part of our exploratory data analysis, we generated histogram plots for several of the major audio features in the dataset, including danceability, energy, loudness, valence, and tempo. These histograms (Figure~\ref{fig:eda_histogram}) helped us understand how each feature is distributed across the dataset and revealed that many musical characteristics have non-uniform or skewed distributions. Understanding these distributions is important for constructing a similarity-based recommendation system, as features with narrow or concentrated ranges may have less discriminative power when comparing tracks.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=7cm]{pic/histogram_popularity.png}
+    \caption{Histogram distributions of selected numerical audio features in the Spotify dataset.}
+    \label{fig:eda_histogram}
+\end{figure}
+
+
+To better understand how listener preferences vary across musical categories, we examined the relationship between genre and popularity. The bar chart in Figure~\ref{fig:eda_relation} shows the average popularity for each genre represented in the dataset. This visualization highlights which genres tend to receive higher user engagement on Spotify and also illustrates the uneven distribution of popularity across categories. Observing this imbalance further supports our decision to exclude popularity as a feature for recommendation, as it reflects platform-wide trends rather than individual user taste.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=9cm]{pic/relation_genre_pop.png}
+    \caption{Relationship between Genre and Popularity.}
+    \label{fig:eda_relation}
+\end{figure}
+
+To investigate how the audio features relate to one another, we generated a correlation heatmap, shown in Figure~\ref{fig:eda_correlation}. This visualization highlights the strength and direction of pairwise relationships between numerical features in the dataset. Several strong correlations are immediately apparent, such as the positive relationship between loudness and energy, as well as between valence and danceability. These patterns indicate that certain musical characteristics tend to co-occur across tracks. Understanding these relationships is important for a similarity-based recommendation system, since highly correlated features contribute similar information when comparing songs.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=9cm]{pic/correlation_heatmap.jpg}
+    \caption{Correlation heatmap of numerical Spotify audio features.}
+    \label{fig:eda_correlation}
+\end{figure}
+
+To further explore the relationships identified in the correlation heatmap, we created scatterplots for pairs of features that exhibited strong positive correlations. Figures~\ref{fig:eda_loudness_v_energy} and~\ref{fig:eda_valence_v_danceability} show two such examples: loudness versus energy, and valence versus danceability. Both plots reveal clear upward trends, indicating that tracks with higher loudness generally have higher energy levels, and songs with greater valence tend to be more danceable. These visual patterns reinforce the idea that certain audio characteristics naturally cluster together, which is valuable information when measuring similarity between songs in a recommendation system.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=9cm]{pic/loudness_vs_energy.jpg}
+    \caption{Scatterplot of Loudness versus Energy.}
+    \label{fig:eda_loudness_v_energy}
+\end{figure}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=9cm]{pic/valence_vs_danceability.jpg}
+    \caption{Scatterplot of Valance verses Danceability.}
+    \label{fig:eda_valence_v_danceability}
+\end{figure}
+
+\subsection{Data Pre-processing and Feature Engineering}
+
+Before building our recommendation system, we performed several preprocessing steps to ensure that the data set was clean, consistent, and suitable for feature-based similarity comparisons. We started by checking for duplicated songs using the \texttt{track\_id} column. The data set contained a substantial number of duplicates, so we removed all repeated entries by keeping only the first occurrence of each unique \texttt{track\_id}. This reduced the data set from 114,000 rows to 89,741 unique tracks, ensuring that no song was overly tagged during model development.
+
+\begin{lstlisting}[language=Python, caption={Duplicate detection and cleanup}]
+dupe_mask = df['track_id'].duplicated(keep=False)
+dupes = df[dupe_mask].sort_values('track_id')
+df = df.drop_duplicates(subset='track_id', keep='first')
+\end{lstlisting}
+
+Next, we removed columns that did not contribute meaningful musical information. Specifically, we dropped the \texttt{track\_id} and \texttt{Unnamed: 0} columns, since they are identifier fields rather than audio or metadata features and therefore cannot be used to compute similarity between songs.
+\begin{lstlisting}[language=Python, caption={Column Removal}]
+df = df.drop('track_id', axis=1)
+df = df.drop('Unnamed: 0', axis=1)
+\end{lstlisting}
+
+After cleaning the dataset, we evaluated the remaining features for their suitability in a recommendation setting. Since popularity does not reflect a user’s personal preference and is computed using an opaque algorithm specific to Spotify, we excluded this column from all downstream analysis. This ensures that recommendations are based purely on the audio characteristics of songs rather than global listening trends.
+
+Although our project did not require creating new engineered features, the preprocessing steps above established a consistent and reliable feature set that will later be standardized. 
+
+
+\subsection{Regression Analysis}
+
+In order to understand how individual audio features contribute to the overall musical characteristics of a track, we applied regression analysis using \texttt{energy} as the target variable. Energy is a continuous numeric feature that reflects the perceptual intensity of a song, making it a good candidate for examining linear relationships in the dataset.
+
+We first computed the correlation between energy and the other numerical features to identify potential predictors. Loudness showed the strongest correlation with energy, followed by danceability and valence. These correlations provided an initial indication that a linear model might capture part of the relationship between audio features and energy.
+
+To quantify these relationships, we trained a multiple linear regression model using seven audio features as predictors. The model was trained on 80\% of the data and evaluated on the remaining 20\%. The resulting validation metrics indicated that the linear model explained a moderate portion of the variance in energy, with R\textsuperscript{2}, MAE, and RMSE values suggesting that the model was capturing general trends but not all complexities of the feature space. Figure~\ref{fig:regression_scatter} shows a scatterplot comparing the model’s predicted energy values to the actual values in the validation set. The clustering around the diagonal line indicates reasonable predictive performance, though with visible deviation reflecting non-linear structure in the data.
+
+We also examined the learned regression coefficients to interpret feature importance. The magnitude and sign of the coefficients aligned with the earlier correlation analysis: loudness had the strongest positive effect on energy, supporting the idea that louder tracks tend to feel more energetic.
+
+To evaluate whether regularization was necessary, we trained a Ridge regression model with an \(\alpha\) value of 2.5. Ridge regression slightly reduced overfitting, bringing the training and validation R\textsuperscript{2} scores closer together. However, the performance improvements were small, indicating that multicollinearity among our selected features was present but not severe. This suggests that while regularization can stabilize the model, the linear feature set did not require heavy penalization to perform effectively.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=8cm]{pic/predicted_vs_actual_energy.png}
+    \caption{Predicted versus actual energy values for the linear regression model on the validation set. The diagonal dashed line represents perfect predictions.}
+    \label{fig:regression_scatter}
+\end{figure}
+
+\subsection{Logistic Regression}
+
+To further analyze classification patterns within the dataset, we applied logistic regression to predict whether a song contains explicit content. The target variable \texttt{explicit} is binary, making logistic regression a natural choice for this task. We used eight audio and metadata features, including popularity, danceability, loudness, energy, instrumentalness, speechiness, valence, and tempo, as predictors.
+
+A key challenge in this task is that explicit songs make up a small minority of the data set, resulting in a class imbalance. To address this, we assigned higher weights to the minority (explicit) class during training, allowing the model to better identify explicit tracks without being overwhelmed by the majority class.
+
+After training the model in an 80/20 train–validation split, we evaluated performance using a confusion matrix (Figure~\ref{fig:log_confusion}), classification report metrics and general prediction accuracy. The confusion matrix revealed that the model correctly identified a large proportion of non-explicit songs while achieving reasonable true positive performance on explicit songs, despite the imbalance. This demonstrates that class weighting improved the model’s sensitivity to explicit content.
+
+To further assess predictive quality, we examined the model’s ROC curve and computed the area under the curve (AUC), shown in Figure~\ref{fig:log_roc}. The resulting AUC score indicated that the logistic model performed substantially better than random guessing and was effective at separating explicit from non-explicit songs based on the selected features.
+
+Finally, we performed 5-fold stratified cross-validation to verify the stability of the model. The AUC and accuracy scores across folds remained consistent, indicating that the model generalizes reliably and is not overfitting. Regularization did not significantly impact performance, suggesting that multicollinearity among the selected features was limited, and the logistic model remained stable without heavy penalization, similar to Linear Regression. 
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=8cm]{pic/log_confusion_matrix.png}
+    \caption{Confusion matrix for logistic regression model predicting explicit content.}
+    \label{fig:log_confusion}
+\end{figure}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=8cm]{pic/log_roc_curve.png}
+    \caption{ROC curve for logistic regression on the validation set. The dashed line represents random guessing.}
+    \label{fig:log_roc}
+\end{figure}
+
+\subsection{KNN, Decision Trees, and Random Forest}
+
+KNN + DECISION TREE + RANDOM FOREST
+
+% i don't seem to have this check in on my end -kevin
+
+\subsection{PCA and Clustering}
+% working on this rn -kevin
+PCA + CLUSTERING
+
+\subsection{Neural Network Experiments}
+
+NEURAL NETWORKS
+
+\subsection{Hyperparameter Tuning}
+
+HYPERPARAMETER TUNING
+
+% \bibliographystyle{alpha}
+ % \bibliography{sample}
+
+\end{document}
