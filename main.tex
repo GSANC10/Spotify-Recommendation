@@ -180,7 +180,36 @@ KNN + DECISION TREE + RANDOM FOREST
 
 \subsection{PCA and Clustering}
 % working on this rn -kevin
-PCA + CLUSTERING
+To explore groupings and latent structure within the Spotify dataset, we applied Principal Component Analysis (PCA) and K-Means clustering. Since clustering algorithms are sensitive to feature scale, we first standardized all numerical predictor variables using a \texttt{StandardScaler}. This ensured that features measured on different scales contributed equally to the distance computations used by K-Means.
+
+We then applied the K-Means algorithm to the standardized feature set. Because the optimal number of clusters is not known beforehand, we used two diagnostic tools: the elbow method and silhouette scores. The elbow plot (Figure~\ref{fig:elbow_plot}) shows the distortion, or within-cluster sum of squares, for values of \( k \) ranging from 2 to 10. The point at which the curve begins to flatten—commonly referred to as the “elbow” suggests a suitable choice for \( k \). Similarly, the silhouette score plot (Figure~\ref{fig:silhouette_plot}) measures how well-separated the clusters are for each value of \( k \). Higher silhouette scores indicate more coherent and better-defined clusters.
+
+Both diagnostics suggested that \( k = 6 \) provided a good balance between low distortion and high separation quality. After selecting \( k = 6 \), we fit the final K-Means model and computed cluster assignments for all standardized samples. Examining the cluster sizes confirmed that no cluster was excessively small or disproportionately large.
+
+To visualize the clusters in two dimensions, we applied PCA to the standardized feature matrix and extracted the first two principal components, which captured the largest amount of variance. Figure~\ref{fig:pca_clusters} shows a 2D scatterplot of the samples in PCA space, colored according to their cluster label. Although PCA reduces the dimensionality and may not retain all information, the plot reveals meaningful separation between several clusters, indicating that the underlying audio features contain structure that can be grouped into musically distinct categories.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=9cm]{pic/elbow_plot.png}
+    \caption{Elbow method showing distortion values for $k$ between 2 and 10. The point where the curve begins to flatten suggests a suitable number of clusters.}
+    \label{fig:elbow_plot}
+\end{figure}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=9cm]{pic/silhouette_scores.png}
+    \caption{Silhouette scores for $k$ between 2 and 10. Higher values indicate more well-defined clusters.}
+    \label{fig:silhouette_plot}
+\end{figure}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=9cm]{pic/pca_clusters.png}
+    \caption{K-Means clustering visualized in the first two principal components. Colors represent the six cluster assignments.}
+    \label{fig:pca_clusters}
+\end{figure}
+
+
 
 \subsection{Neural Network Experiments}
 
