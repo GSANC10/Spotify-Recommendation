@@ -32,34 +32,20 @@
 }
 
 
-\title{Spotify Track Popularity Predicition}
-\author{Kevin Alvarez \and 
-Will Burns \and 
-Jenna Jabourian \and 
-Connor Perrone \and 
-Gabe Sanchez}
+\title{Appendix}
 
 \begin{document}
 \maketitle
 
-\begin{abstract}
-Blah Blah Blah
-\end{abstract}
 
 \section{Introduction}
 
-The purpose of this project is to analyze the Spotify track data set and develop a model capable of predicting the popularity of the track using various features. The data set contains numerical and categorical attributes that describe musical characteristics such as danceability, loudness, energy, tempo, key, and valence. Our goal is to explore which features are the most strongly correlated with popularity and to compare different predictive methods in terms of accuracy, interpret-ability, and robustness. 
+This document serves as the appendix to the main project report and provides detailed methods, analyses, figures, and supplemental explanations that support the results presented therein. The appendix includes expanded descriptions of exploratory data analysis, preprocessing steps, regression models, classification techniques, clustering diagnostics, and neural network experiments. All materials here are intended to offer full methodological transparency and reproducibility for the Spotify track analysis project.
 
-\section{Results}
-Blah Blah Blah
-
-\section{Discussion}
-
-Blah Blah Blah
 
 \appendix
-\section{Methods}
-\textbf{Aside:}, note that all of the code for the following has been already submitted as part of the Project Check-In, therefore does not need to resubmitted according to the project spec. 
+\section{Appendix A: Additional Analyses and Supporting Material}
+\textbf{Aside:} All code referenced in the following subsection was already submitted as part of the Project Check-In and, per the project specifications, does not need to be resubmitted.
 \subsection{Exploratory Data Analysis}
 
 For our exploratory data analysis (EDA), we began by examining the structure of the Spotify dataset, including the number of observations, feature types, and any missing or duplicated entries. We generate summary statistics for numerical features to understand their ranges, distributions, and potential outliers.
@@ -410,18 +396,53 @@ After tuning, the logistic regression model achieved stable AUC and accuracy met
 KNN performance depends heavily on the choice of \( k \). We initially trained the model with \( k = 3 \), which provided a good baseline. To evaluate model stability, we ran stratified 5-fold cross-validation with \( k = 5 \), observing consistent accuracy and AUC values across folds. This indicated that the classifier was robust to moderate changes in \( k \), although limited by class imbalance inherent in the dataset.
 
 \subsubsection*{Neural Network Autoencoder}
+
 The autoencoder required tuning of several hyperparameters, including:
 
 \begin{itemize}
     \item \textbf{Embedding Dimension:} We selected a 12-dimensional latent space to balance compression and reconstruction quality.
     \item \textbf{Hidden Layer Widths:} The encoder and decoder each used a 64-unit hidden layer based on preliminary experiments.
     \item \textbf{Activation Functions:} ReLU was chosen for its stability and suitability for continuous-valued data.
-    \item \textbf{Learning Rate:} A learning rate of 0.001 with the Adam optimizer produced smooth convergence.
-    \item \textbf{Epochs:} Training for 40 epochs allowed the loss to stabilize without overfitting, as seen in the downward trend in Table~3 and Figure~\ref{fig:auto_loss}.
+    \item \textbf{Learning Rate:} The learning rate required dedicated tuning. Multiple values (\texttt{0.0001}, \texttt{0.001}, \texttt{0.01}) were systematically tested to determine which produced the best convergence behavior for the autoencoder.
+    \item \textbf{Epochs:} Training for 40 epochs allowed the loss to stabilize without overfitting, as seen in Table~3 and Figure~\ref{fig:auto_loss}.
     \item \textbf{Batch Size:} A batch size of 64 balanced learning stability and computational efficiency.
 \end{itemize}
 
-The combination of these tuned hyperparameters yielded a highly accurate autoencoder with excellent reconstruction performance, as summarized in Table~2.
+To improve training stability and reconstruction quality, we conducted a systematic hyperparameter tuning experiment focused on determining the optimal learning rate. Three learning rates were evaluated: \texttt{0.0001}, \texttt{0.001}, and \texttt{0.01}. For each value, a fresh autoencoder model was trained from scratch for 30 epochs using the Adam optimizer and mean squared error (MSE) loss.
+
+Table~\ref{tab:lr-results} summarizes the final validation losses for each tested learning rate. Among the three candidates, the highest-performing value was \textbf{0.01}, which achieved the lowest validation loss. This indicates that a moderately aggressive learning rate enabled efficient convergence without destabilizing training.
+
+\begin{table}[H]
+\centering
+\begin{tabular}{|c|c|}
+\hline
+\textbf{Learning Rate} & \textbf{Final Validation Loss} \\ \hline
+0.0001 & 0.0339 \\ \hline
+0.001  & 0.0101 \\ \hline
+0.01   & \textbf{0.0022} \\ \hline
+\end{tabular}
+\caption{Validation loss comparison across learning rates. The learning rate of 0.01 performed best.}
+\label{tab:lr-results}
+\end{table}
+
+The training and validation loss curves for each learning rate are shown in Figures~\ref{fig:lr-train} and~\ref{fig:lr-val}. Lower learning rates (\texttt{0.0001} and \texttt{0.001}) converged slowly and often plateaued early, whereas the learning rate of \texttt{0.01} consistently reached the lowest loss values and demonstrated stable, monotonic convergence.
+
+This experiment confirms that \textbf{a learning rate of 0.01 is optimal for the autoencoder}. Incorporating this result into the final configuration contributed significantly to the strong reconstruction performance reported in Table~2.
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.9\textwidth]{pic/learning_rate_train_loss.png}
+\caption{Training loss curves for each tested learning rate. The learning rate of 0.01 converges significantly faster.}
+\label{fig:lr-train}
+\end{figure}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=0.9\textwidth]{pic/learning_rate_val_loss.png}
+\caption{Validation loss curves comparing learning rates. The learning rate of 0.01 achieves the lowest final validation loss.}
+\label{fig:lr-val}
+\end{figure}
+
 
 \subsubsection*{Summary}
 Across all models, hyperparameter tuning played a key role in improving predictive accuracy, stability, and interpretability. By systematically adjusting cluster sizes, regularization strengths, class weights, nearest-neighbor counts, and neural network architecture components, we ensured that each modeling approach was optimized for the characteristics of the Spotify dataset.
