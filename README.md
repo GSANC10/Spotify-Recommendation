@@ -47,7 +47,7 @@ By using the Spotify dataset we built a recommendation system that mathematicall
 ---
 
 ### Methodology
-TODO
+We approached this problem by trying to implement several different algorithms. First, we tried to implement KNN to develop an initial recommendation system. This was based on the idea that we could find similar songs using distances from one point to nearest featuers as described above. Then, this was combined with the Random Forest model for popularity prediction. The underlying reasoning behind this was to try to recommend songs that were both predicted to be popular, but also similar to the initial song. To better capture nonlinear relationships between the many audio features, our final implementation of this recommendation system utilizes a neural network autoencoder. This ultimately helped build our recommendation system because the autoencoder learns a compressed embedding of each track by training the network to reconstruct the original input from a reduced latent space. This is particularly helpful for our recommendations system as our dataset looks at many different audio characteristics, meaning it is helpful to look across multiple dimensions to find songs with similar features. We used ReLU as our activation function and MSE as our loss function. To evaluate model performance, we measured reconstruction loss across epochs and found values for the MSE, MAE, RMSE, and R^2 performance metrics.
 
 ---
 
@@ -60,4 +60,5 @@ TODO
 How to run the code (TODO)
 
 For reference, this link shows how to download a notebook as a PDF
+
 https://stackoverflow.com/questions/52588552/google-co-laboratory-notebook-pdf-download
