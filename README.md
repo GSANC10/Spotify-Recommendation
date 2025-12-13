@@ -8,8 +8,12 @@
 
 ---
 
-### Dataset
-We used the [spotify-tracks-dataset](https://huggingface.co/datasets/maharshipandya/spotify-tracks-dataset) which contains information on 114,000 tracks on Spotify spanning over 125 genres.
+## Dataset
+
+We use the **Spotify Tracks Dataset**, which contains information on approximately **114,000 tracks** spanning over **125 genres**.
+
+🔗 **Dataset Source:**  
+https://huggingface.co/datasets/maharshipandya/spotify-tracks-dataset
 
 The data is in CSV format, with a single track being the observational unit in each row. The Hugging Face Dataset card defines the columns as:
 
@@ -57,26 +61,18 @@ TODO
 ---
 
 ### Usage
-## Dataset
-
-This project uses the **Spotify Tracks Dataset** hosted on Hugging Face.
-
-🔗 **Dataset Source:**  
-https://huggingface.co/datasets/maharshipandya/spotify-tracks-dataset
-
-### How to Download the Dataset
+### Dataset Download Instructions
 
 1. Visit the dataset link above  
-2. Click on **Files and versions**  
+2. Click **Files and versions**  
 3. Download the CSV file containing the Spotify track data  
-4. Rename the downloaded file to: dataset.csv
+4. Rename the downloaded file to:
 5. Place `dataset.csv` in the **same directory** as `ExampleNotebookOfChoice.ipynb`
 
 The notebook expects the dataset to be named **exactly** `dataset.csv`.
 
 ---
 
-## Usage
 ### How to Run `SpotifyRecommendationNN.ipynb`
 
 This notebook trains an **autoencoder-based neural network** that learns compact song embeddings from Spotify audio features. These embeddings are used to recommend similar songs based on learned musical characteristics.
@@ -113,4 +109,5 @@ pip install pandas numpy scikit-learn matplotlib
 For reference, this link shows how to download a notebook as a PDF
 
 https://stackoverflow.com/questions/52588552/google-co-laboratory-notebook-pdf-download
+
 
