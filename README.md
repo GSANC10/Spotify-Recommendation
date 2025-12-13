@@ -1,5 +1,5 @@
 # Spotify Recommendation
-### Created by
+## Created by
 - Kevin Alvarez
 - Will Burns
 - Jenna Jabourian
@@ -9,11 +9,7 @@
 ---
 
 ## Dataset
-
-We use the **Spotify Tracks Dataset**, which contains information on approximately **114,000 tracks** spanning over **125 genres**.
-
-🔗 **Dataset Source:**  
-https://huggingface.co/datasets/maharshipandya/spotify-tracks-dataset
+We used the [spotify-tracks-dataset](https://huggingface.co/datasets/maharshipandya/spotify-tracks-dataset) which contains information on 114,000 tracks on Spotify spanning over 125 genres.
 
 The data is in CSV format, with a single track being the observational unit in each row. The Hugging Face Dataset card defines the columns as:
 
@@ -43,41 +39,122 @@ The data is in CSV format, with a single track being the observational unit in e
 
 ---
 
-### Problem
+## Problem
 Everyone has different prefernces for the music they listen to, but there is often an underlying "feeling" associated with songs we like. To find new songs similar to those we enjoy, we could try to search by describing this "feeling". But that can only get us so far.
 
 By using the Spotify dataset we built a recommendation system that mathematically finds this "feeling" so the user can find more songs they enjoy based on their provided reference songs.
 
 ---
 
-### Methodology
+## Methodology
 We approached this problem by trying to implement several different algorithms. First, we tried to implement KNN to develop an initial recommendation system. This was based on the idea that we could find similar songs using distances from one point to nearest featuers as described above. Then, this was combined with the Random Forest model for popularity prediction. The underlying reasoning behind this was to try to recommend songs that were both predicted to be popular, but also similar to the initial song. To better capture nonlinear relationships between the many audio features, our final implementation of this recommendation system utilizes a neural network autoencoder. This ultimately helped build our recommendation system because the autoencoder learns a compressed embedding of each track by training the network to reconstruct the original input from a reduced latent space. This is particularly helpful for our recommendations system as our dataset looks at many different audio characteristics, meaning it is helpful to look across multiple dimensions to find songs with similar features. We used ReLU as our activation function and MSE as our loss function. To evaluate model performance, we measured reconstruction loss across epochs and found values for the MSE, MAE, RMSE, and R^2 performance metrics.
 
 ---
 
-### Results
-TODO
+## Results
+
+### Evaluation Metrics Summary
+
+#### Neural Network Autoencoder (Primary Recommendation Method)
+
+| Metric | Value |
+|--------|-------|
+| MSE | 0.005568 |
+| MAE | 0.041211 |
+| RMSE | 0.074618 |
+| R² | 0.994432 |
+
+Training progression: Loss decreased from 0.10347 (epoch 1) → 0.00545 (epoch 40), demonstrating stable convergence.
+
+#### Logistic Regression (Explicit Content Classification)
+
+| Metric | Value |
+|--------|-------|
+| AUC Score | 0.8073 |
+| Cross-validation | 5-fold stratified |
+| Class weights | {0:1, 1:8} |
+
+#### K-Nearest Neighbors (KNN) Classification
+
+| Fold | Accuracy | AUC |
+|------|----------|-----|
+| 1 | 0.914 | 0.740 |
+| 2 | 0.909 | 0.709 |
+| 3 | 0.906 | 0.687 |
+| 4 | 0.914 | 0.754 |
+| 5 | 0.914 | 0.715 |
+| **Mean** | **0.912** | **0.721** |
+
+- True Negative Rate: 0.9709 (non-explicit songs)
+- True Positive Rate: 0.2876 (explicit songs)
+
+#### Linear/Ridge Regression (Energy Prediction)
+
+- Train/validation split: 80/20
+- Ridge regularization: α = 2.5
+- Moderate R² explaining general trends
+
+#### K-Means Clustering
+
+- Selected **k=6** clusters based on elbow method and silhouette scores
 
 ---
 
-### Usage
-### Dataset Download Instructions
+### Why We Chose the Neural Network Autoencoder
+
+We selected the **neural network autoencoder** as our primary recommendation method for the following reasons:
+
+1. **Captures Nonlinear Relationships**: Unlike KNN or linear regression, the autoencoder captures complex, nonlinear relationships among the many audio features (danceability, energy, loudness, valence, tempo, etc.)
+
+2. **Learned Embeddings**: The autoencoder compresses each song into a 12-dimensional latent space embedding. Songs with similar embeddings share similar musical characteristics across multiple dimensions.
+
+3. **Superior Reconstruction Fidelity**: With an R² of 0.9944, the autoencoder demonstrates remarkable ability to represent and reconstruct the original feature vectors.
+
+4. **Efficient Similarity Search**: After training, the embeddings enable efficient similarity-based recommendations using cosine similarity-identifying songs that "feel" similar based on their learned representations.
+
+5. **Outperforms Alternatives**:
+   - KNN struggled with class imbalance (low true positive rate of 0.2876 for minority class)
+   - Linear regression captured only moderate variance and missed nonlinear patterns
+
+---
+
+### Limitations
+
+| Method | Limitation |
+|--------|------------|
+| **Neural Network Autoencoder** | Requires standardized numerical features, and doesn't incorporate genre labels or artist information directly, as a person might |
+| **KNN** | Limited performance on minority class detection, and sensitive to class imbalance |
+| **Linear Regression** | Visible deviation from diagonal indicates nonlinear structure not captured |
+| **General** | Popularity excluded from features (reflects Spotify's user trends, not personal taste), and the dataset size was reduced by ~21% from 114,000 to 89,741 after duplicate removal, which is more than initially presumed. |
+
+---
+
+
+## Usage
+### Dataset
+
+This project uses the **Spotify Tracks Dataset** hosted on Hugging Face.
+
+🔗 **Dataset Source:**  
+https://huggingface.co/datasets/maharshipandya/spotify-tracks-dataset
+
+### How to Download the Dataset
 
 1. Visit the dataset link above  
-2. Click **Files and versions**  
+2. Click on **Files and versions**  
 3. Download the CSV file containing the Spotify track data  
-4. Rename the downloaded file to:
-5. Place `dataset.csv` in the **same directory** as `WorkingNotebookOfChoice.ipynb`
+4. Rename the downloaded file to: dataset.csv
+5. Place `dataset.csv` in the **same directory** as `ExampleNotebookOfChoice.ipynb`
 
 The notebook expects the dataset to be named **exactly** `dataset.csv`.
 
 ---
 
+
 ### How to Run `SpotifyRecommendationNN.ipynb`
 
 This notebook trains an **autoencoder-based neural network** that learns compact song embeddings from Spotify audio features. These embeddings are used to recommend similar songs based on learned musical characteristics.
 
----
 
 ### 1. Environment Setup
 
@@ -91,7 +168,6 @@ You may run this notebook in **Google Colab** (recommended) or **locally**.
 
 No additional installation is required.
 
----
 
 #### Option B: Local Setup
 
@@ -101,8 +177,8 @@ Ensure you are using **Python 3.9 or later**. Install the required dependencies:
 pip install torch torchvision torchaudio
 pip install pandas numpy scikit-learn matplotlib
 ```
----
 
+---
 ### How to Run `KNN_RF_implementation.ipynb`
 This notebook contains a **K-Nearest-Neighbors and Random Forest combined model** that finds songs with similar features using KNN, then combines these results with RF to recommend similar songs based on popularity.
 
@@ -118,7 +194,6 @@ You may run this notebook in **Google Colab** (recommended) or **locally**.
 
 No additional installation is required.
 
----
 
 #### Option B: Local Setup
 
@@ -127,13 +202,25 @@ Ensure you are using **Python 3.9 or later**. Install the required dependencies:
 ```bash
 pip install pandas scikit-learn
 ```
+---
 
+## Project Structure
 
+```
+├── dataset.csv                      # Spotify tracks dataset
+├── Spotify_Recommendation_NN.ipynb  # Neural network autoencoder implementation
+├── KNN_RF_implementation.ipynb      # KNN and Random Forest models
+├── Appendix.pdf                     # Detailed methodology and figures
+├── reference_songs.txt              # Sample reference songs for testing
+└── README.md                        # Project documentation
+```
 
+---
 
-For reference, this link shows how to download a notebook as a PDF
+## References
 
-https://stackoverflow.com/questions/52588552/google-co-laboratory-notebook-pdf-download
+- Dataset: [spotify-tracks-dataset](https://huggingface.co/datasets/maharshipandya/spotify-tracks-dataset) (114,000 tracks, 125+ genres)
+- For reference, [this link](https://stackoverflow.com/questions/52588552/google-co-laboratory-notebook-pdf-download) shows how to download a notebook as a PDF
 
 
 
