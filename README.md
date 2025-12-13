@@ -57,8 +57,60 @@ TODO
 ---
 
 ### Usage
-How to run the code (TODO)
+## Dataset
+
+This project uses the **Spotify Tracks Dataset** hosted on Hugging Face.
+
+🔗 **Dataset Source:**  
+https://huggingface.co/datasets/maharshipandya/spotify-tracks-dataset
+
+### How to Download the Dataset
+
+1. Visit the dataset link above  
+2. Click on **Files and versions**  
+3. Download the CSV file containing the Spotify track data  
+4. Rename the downloaded file to: dataset.csv
+5. Place `dataset.csv` in the **same directory** as `ExampleNotebookOfChoice.ipynb`
+
+The notebook expects the dataset to be named **exactly** `dataset.csv`.
+
+---
+
+## Usage
+### How to Run `SpotifyRecommendationNN.ipynb`
+
+This notebook trains an **autoencoder-based neural network** that learns compact song embeddings from Spotify audio features. These embeddings are used to recommend similar songs based on learned musical characteristics.
+
+---
+
+### 1. Environment Setup
+
+You may run this notebook in **Google Colab** (recommended) or **locally**.
+
+#### Option A: Google Colab (Recommended)
+
+1. Upload `SpotifyRecommendationNN.ipynb` to Google Colab  
+2. Set the runtime to **Python 3**  
+3. Upload `dataset.csv` to the Colab file system  
+
+No additional installation is required.
+
+---
+
+#### Option B: Local Setup
+
+Ensure you are using **Python 3.9 or later**. Install the required dependencies:
+
+```bash
+pip install torch torchvision torchaudio
+pip install pandas numpy scikit-learn matplotlib
+```
+
+
+
+
 
 For reference, this link shows how to download a notebook as a PDF
 
 https://stackoverflow.com/questions/52588552/google-co-laboratory-notebook-pdf-download
+
